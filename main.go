@@ -75,6 +75,7 @@ func searchHandler(service *sheets.Service) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		}
 
+		// TODO: properly map results to model structs based on category
 		return c.JSON(http.StatusOK, rowResults)
 	}
 }
