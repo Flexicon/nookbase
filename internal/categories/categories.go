@@ -11,6 +11,8 @@ import (
 func BuildCategoryFromRow(category string, row []interface{}) interface{} {
 	// TODO: map remaining categories
 	switch category {
+	case names.Insects:
+		return insectFromRow(row)
 	case names.Fish:
 		return fishFromRow(row)
 	case names.SeaCreatures:
