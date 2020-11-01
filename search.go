@@ -7,14 +7,10 @@ import (
 	"strings"
 
 	"github.com/flexicon/nookbase/internal/categories/names"
+	"github.com/flexicon/nookbase/internal/mapping"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"google.golang.org/api/sheets/v4"
-)
-
-const (
-	// SearchBatchLimit - the maximum amount of ranges that we want to query in a single request to Google Sheets API
-	SearchBatchLimit = 400
 )
 
 var (
@@ -62,7 +58,7 @@ var (
 // GET /search/:category
 func SearchHandler(service *sheets.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		category := SearchCategories.Get(sanitizeCategory(c.Param("category")))
+		category := SearchCategories.Get(mapping.NormalizeCategory(c.Param("category")))
 		if category == nil {
 			return c.JSON(http.StatusBadRequest, InvalidCategoryError(SearchCategories))
 		}
@@ -78,7 +74,7 @@ func SearchHandler(service *sheets.Service) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		}
 
-		matchIndexes := findMatchesInValues(nameResults.Values, q)
+		matchIndexes := findQueryMatchesInValues(nameResults.Values, q)
 
 		rowResults, err := getRowsByIndexes(service, category.Name(), matchIndexes)
 		if err != nil {
@@ -90,7 +86,7 @@ func SearchHandler(service *sheets.Service) echo.HandlerFunc {
 	}
 }
 
-func findMatchesInValues(values [][]interface{}, query string) []int {
+func findQueryMatchesInValues(values [][]interface{}, query string) []int {
 	var matchIndexes []int
 	for i, cells := range values {
 		if len(cells) != 0 && strings.Contains(strings.ToLower(cells[0].(string)), query) {
@@ -118,52 +114,4 @@ func getNamesForCategory(service *sheets.Service, category Category) (*sheets.Va
 	}
 
 	return results, nil
-}
-
-func getRowsByIndexes(service *sheets.Service, category string, indexes []int) ([]*sheets.ValueRange, error) {
-	var rows []*sheets.ValueRange
-	var remainingRanges []string
-
-	for _, rangeStr := range indexesToRanges(category, indexes) {
-		if cachedRow, hit := Cache[rangeStr]; hit {
-			rows = append(rows, cachedRow.(*sheets.ValueRange))
-		} else {
-			remainingRanges = append(remainingRanges, rangeStr)
-		}
-	}
-
-	if len(remainingRanges) != 0 {
-		for i := 0; len(remainingRanges)-i > 1; i += SearchBatchLimit {
-			upperLimit := i + SearchBatchLimit
-			if upperLimit > len(remainingRanges) {
-				upperLimit = i + (len(remainingRanges) % SearchBatchLimit)
-			}
-
-			call := service.Spreadsheets.Values.BatchGet(SpreadsheetID)
-			results, err := call.Ranges(remainingRanges[i:upperLimit]...).ValueRenderOption("FORMULA").Do()
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to retrieve matched rows")
-			}
-
-			for j, row := range results.ValueRanges {
-				Cache[remainingRanges[j+i]] = row
-				rows = append(rows, row)
-			}
-		}
-	}
-
-	return rows, nil
-}
-
-func indexesToRanges(sheet string, indexes []int) []string {
-	var ranges []string
-	for _, i := range indexes {
-		ranges = append(ranges, fmt.Sprintf("%s!%d:%d", sheet, i, i))
-	}
-
-	return ranges
-}
-
-func sanitizeCategory(category string) string {
-	return strings.ToLower(strings.ReplaceAll(category, "_", " "))
 }

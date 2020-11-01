@@ -37,6 +37,7 @@ func main() {
 	}))
 
 	e.GET("/search/:category", SearchHandler(service))
+	e.GET("/seasonal/:hemisphere/:category", SeasonalHandler(service))
 
 	e.Logger.Fatal(e.Start(":3000"))
 }

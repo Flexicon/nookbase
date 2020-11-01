@@ -20,6 +20,24 @@ func InvalidCategoryError(c CategoriesMap) ErrorResponse {
 	return ErrorResponse{Error: "invalid category", Extra: map[string]interface{}{"categories": c.List()}}
 }
 
+// Hemisphere - either northern or southern
+type Hemisphere string
+
+// IsValid hemisphere value
+func (h Hemisphere) IsValid() bool {
+	switch h {
+	case Northern, Southern:
+		return true
+	}
+	return false
+}
+
+// Hemishperes
+const (
+	Northern Hemisphere = "northern"
+	Southern Hemisphere = "southern"
+)
+
 // CategoryRow represents a placeholder for the category row response
 type CategoryRow interface{}
 
@@ -27,8 +45,10 @@ type CategoryRow interface{}
 type Category interface {
 	// Name returns the category name
 	Name() string
-	// NameColumn returns a string, referring to the column range in which an category's name can be found
+	// NameColumn returns a string, referring to the column range in which the name of a category name can be found
 	NameColumn() string
+	// AvailabilityRange returns a string, referring to the column range in which the given hemishpere's availability of a category can be found or an empty string
+	AvailabilityRange(hemishpere Hemisphere) string
 	// MapValueRanges to response models
 	MapValueRanges(ranges []*sheets.ValueRange) []CategoryRow
 }
@@ -84,6 +104,10 @@ func (c defaultCategory) NameColumn() string {
 	return fmt.Sprintf("%s!A2:A", c.name)
 }
 
+func (c defaultCategory) AvailabilityRange(hemishpere Hemisphere) string {
+	return ""
+}
+
 func (c defaultCategory) MapValue(vRange *sheets.ValueRange) CategoryRow {
 	return categories.BuildCategoryFromRow(c.Name(), vRange.Values[0])
 }
@@ -111,6 +135,17 @@ func (c insectsCategory) NameColumn() string {
 	return fmt.Sprintf("%s!B2:B", c.name)
 }
 
+func (c insectsCategory) AvailabilityRange(hemishpere Hemisphere) string {
+	switch hemishpere {
+	case Northern:
+		return fmt.Sprintf("%s!K2:V", c.name)
+	case Southern:
+		return fmt.Sprintf("%s!W2:AH", c.name)
+	default:
+		return ""
+	}
+}
+
 // fishCategory - https://docs.google.com/spreadsheets/d/13d_LAJPlxMa_DubPTuirkIV4DERBMXbrWQsmSh8ReK4/edit#gid=1111506211
 type fishCategory struct {
 	defaultCategory
@@ -124,6 +159,17 @@ func (c fishCategory) NameColumn() string {
 	return fmt.Sprintf("%s!B2:B", c.name)
 }
 
+func (c fishCategory) AvailabilityRange(hemishpere Hemisphere) string {
+	switch hemishpere {
+	case Northern:
+		return fmt.Sprintf("%s!M2:X", c.name)
+	case Southern:
+		return fmt.Sprintf("%s!Y2:AJ", c.name)
+	default:
+		return ""
+	}
+}
+
 // seaCreaturesCategory - https://docs.google.com/spreadsheets/d/13d_LAJPlxMa_DubPTuirkIV4DERBMXbrWQsmSh8ReK4/edit#gid=60735325
 type seaCreaturesCategory struct {
 	defaultCategory
@@ -135,4 +181,15 @@ func newSeaCreaturesCategory() seaCreaturesCategory {
 
 func (c seaCreaturesCategory) NameColumn() string {
 	return fmt.Sprintf("%s!B2:B", c.name)
+}
+
+func (c seaCreaturesCategory) AvailabilityRange(hemishpere Hemisphere) string {
+	switch hemishpere {
+	case Northern:
+		return fmt.Sprintf("%s!K2:V", c.name)
+	case Southern:
+		return fmt.Sprintf("%s!W2:AH", c.name)
+	default:
+		return ""
+	}
 }
