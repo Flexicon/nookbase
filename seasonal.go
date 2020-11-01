@@ -46,7 +46,7 @@ func SeasonalHandler(service *sheets.Service) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		}
 		// Narrow down to only ones available in the current season
-		availableIndexes := findAvailableInValues(availability.Values, int(time.Now().Month()))
+		availableIndexes := findAvailableForMonthInValues(availability.Values, int(time.Now().Month()))
 
 		// Retrieve full rows for matched indexes
 		rowResults, err := getRowsByIndexes(service, category.Name(), availableIndexes)
@@ -77,7 +77,7 @@ func getAvailabilityForCategory(service *sheets.Service, category Category, hemi
 	return results, nil
 }
 
-func findAvailableInValues(values [][]interface{}, month int) []int {
+func findAvailableForMonthInValues(values [][]interface{}, month int) []int {
 	var matchIndexes []int
 	for i, cells := range values {
 		if len(cells) >= month && strings.ToUpper(cells[month-1].(string)) != "NA" {
