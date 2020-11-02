@@ -11,7 +11,7 @@ import (
 
 // ErrorResponse JSON format
 type ErrorResponse struct {
-	Error string                 `json:"error"`
+	Error string                 `json:"error" example:"invalid input"`
 	Extra map[string]interface{} `json:"extra,omitempty"`
 }
 
@@ -38,9 +38,6 @@ const (
 	Southern Hemisphere = "southern"
 )
 
-// CategoryRow represents a placeholder for the category row response
-type CategoryRow interface{}
-
 // Category in dataset
 type Category interface {
 	// Name returns the category name
@@ -50,7 +47,7 @@ type Category interface {
 	// AvailabilityRange returns a string, referring to the column range in which the given hemishpere's availability of a category can be found or an empty string
 	AvailabilityRange(hemishpere Hemisphere) string
 	// MapValueRanges to response models
-	MapValueRanges(ranges []*sheets.ValueRange) []CategoryRow
+	MapValueRanges(ranges []*sheets.ValueRange) []categories.CategoryItem
 }
 
 // CategoriesMap for a given resource
@@ -108,12 +105,12 @@ func (c defaultCategory) AvailabilityRange(hemishpere Hemisphere) string {
 	return ""
 }
 
-func (c defaultCategory) MapValue(vRange *sheets.ValueRange) CategoryRow {
+func (c defaultCategory) MapValue(vRange *sheets.ValueRange) categories.CategoryItem {
 	return categories.BuildCategoryFromRow(c.Name(), vRange.Values[0])
 }
 
-func (c defaultCategory) MapValueRanges(ranges []*sheets.ValueRange) []CategoryRow {
-	rows := make([]CategoryRow, 0)
+func (c defaultCategory) MapValueRanges(ranges []*sheets.ValueRange) []categories.CategoryItem {
+	rows := make([]categories.CategoryItem, 0)
 
 	for _, value := range ranges {
 		rows = append(rows, c.MapValue(value))
