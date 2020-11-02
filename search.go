@@ -56,7 +56,7 @@ var (
 // SearchHandler - performs a lookup for items in the given category
 //
 // @Summary Performs a search for items in the given category
-// @Tags search
+// @Tags items
 //
 // @Accept  json
 // @Produce  json

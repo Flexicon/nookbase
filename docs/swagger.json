@@ -16,7 +16,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "search"
+                    "items"
                 ],
                 "summary": "Performs a search for items in the given category",
                 "parameters": [
@@ -25,6 +25,63 @@
                         "description": "The search query",
                         "name": "q",
                         "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Item category to search through (eg: fish, insects, etc.)",
+                        "name": "category",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/categories.CategoryItem"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/seasonal/{hemisphere}/{category}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Performs a lookup for items that are currently in season for the given hemisphere and category",
+                "parameters": [
+                    {
+                        "enum": [
+                            "northern",
+                            "southern"
+                        ],
+                        "type": "string",
+                        "description": "The hemisphere to check availability for",
+                        "name": "hemisphere",
+                        "in": "path",
                         "required": true
                     },
                     {

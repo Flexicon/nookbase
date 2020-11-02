@@ -25,7 +25,20 @@ var (
 
 // SeasonalHandler - performs a lookup for items that are currently in season for the given hemisphere and category
 //
-// GET /seasonal/:hemisphere/:category
+// @Summary Performs a lookup for items that are currently in season for the given hemisphere and category
+// @Tags items
+//
+// @Accept  json
+// @Produce  json
+//
+// @Param hemisphere path string true "The hemisphere to check availability for" Enums(northern, southern)
+// @Param category path string true "Item category to search through (eg: fish, insects, etc.)"
+//
+// @Success 200 {object} []categories.CategoryItem
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+//
+// @Router /seasonal/{hemisphere}/{category} [get]
 func SeasonalHandler(service *sheets.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Validate inputs
