@@ -55,7 +55,20 @@ var (
 
 // SearchHandler - performs a lookup for items in the given category
 //
-// GET /search/:category
+// @Summary Performs a search for items in the given category
+// @Tags search
+//
+// @Accept  json
+// @Produce  json
+//
+// @Param q query string true "The search query"
+// @Param category path string true "Item category to search through (eg: fish, insects, etc.)"
+//
+// @Success 200 {object} []categories.CategoryItem
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+//
+// @Router /search/{category} [get]
 func SearchHandler(service *sheets.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		category := SearchCategories.Get(mapping.NormalizeCategory(c.Param("category")))

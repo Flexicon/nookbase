@@ -10,8 +10,11 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	swagger "github.com/swaggo/echo-swagger"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
+
+	_ "github.com/flexicon/nookbase/docs"
 )
 
 const (
@@ -24,6 +27,9 @@ var (
 	Cache = make(map[string]interface{})
 )
 
+// @title Nookbase
+// @version 1.0
+// @description Animal Crossing data galore
 func main() {
 	if err := initViper(); err != nil {
 		log.Fatal(err)
@@ -46,6 +52,7 @@ func main() {
 
 	e.GET("/search/:category", SearchHandler(service))
 	e.GET("/seasonal/:hemisphere/:category", SeasonalHandler(service))
+	e.GET("/swagger/*", swagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", viper.GetInt("port"))))
 }
