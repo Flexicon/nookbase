@@ -172,6 +172,9 @@ var doc = `{
                 "number": {
                     "type": "integer"
                 },
+                "rainy_days": {
+                    "type": "boolean"
+                },
                 "sell": {
                     "type": "integer"
                 },

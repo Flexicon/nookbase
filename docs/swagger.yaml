@@ -23,6 +23,8 @@ definitions:
         $ref: '#/definitions/categories.YearlyAvailability'
       number:
         type: integer
+      rainy_days:
+        type: boolean
       sell:
         type: integer
       sh_availability:
