@@ -33,6 +33,7 @@ type CategoryItem struct {
 	Sell                 int64               `json:"sell,omitempty"`
 	WhereHow             string              `json:"where_how,omitempty"`
 	Weather              string              `json:"weather,omitempty"`
+	RainyDays            *bool               `json:"rainy_days,omitempty"`
 	MovementSpeed        string              `json:"movement_speed,omitempty"`
 	Shadow               string              `json:"shadow,omitempty"`
 	CatchDifficulty      string              `json:"catch_difficulty,omitempty"`
